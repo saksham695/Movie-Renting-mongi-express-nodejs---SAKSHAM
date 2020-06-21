@@ -9,6 +9,7 @@ const admin = require("../../middleware/admin");
 router.get(
   "/",
   auth,
+
   asyncMiddleware(async (req, res) => {
     const movie = await Movie.find().sort("name");
     res.send(movie);
@@ -49,12 +50,11 @@ router.get(
   "/:movieId",
   auth,
   asyncMiddleware(async (req, res) => {
-    const getMovieDetails = await Movie.find({
+    const getMovieDetails = await Movie.findOne({
       _id: req.params.movieId,
     });
-    console.log(updateMovieDetails);
 
-    res.status(200).send(getMovieDetails);
+    return res.status(200).send(getMovieDetails);
   })
 );
 

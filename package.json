@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --watchAll --verbose"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +17,11 @@
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.15",
     "mongoose": "^5.9.18",
+    "supertest": "^4.0.2",
     "validator": "^13.1.1"
+  },
+  "devDependencies": {
+    "jest": "^26.0.1",
+    "supertest": "^4.0.2"
   }
 }

@@ -25,6 +25,8 @@ app.use("/api/movies", Movie);
 app.use("/api/customer", Customer);
 app.use("/api/rental", Rentals);
 
-app.listen(5000, () => {
+const server = app.listen(5000, () => {
   console.log("Server is up on port 5000");
 });
+
+module.exports = server;

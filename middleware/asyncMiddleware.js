@@ -5,7 +5,7 @@ function asyncMiddleware(handle) {
       await handle(req, res);
     } catch (error) {
       console.log("Error", error.message);
-      return res.send(error.message);
+      return res.status(400).send(error.message);
       next(error);
     }
   };
