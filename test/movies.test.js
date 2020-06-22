@@ -2,6 +2,7 @@ const request = require("supertest");
 const { Movie } = require("../models/movie/movies");
 const { User } = require("../models/user/users");
 let server;
+
 describe("/api/movies", () => {
   beforeEach(() => {
     server = require("../index");
@@ -12,14 +13,14 @@ describe("/api/movies", () => {
   });
 
   describe("GET", () => {
-    it("should return all the movies", async () => {
+    it("should return all the movies of current page", async () => {
       await Movie.collection.insertMany([
         { name: "movie1", numberInStock: 50, dailyRentalRate: 10 },
         { name: "movie2", numberInStock: 50, dailyRentalRate: 10 },
       ]);
       const token = new User().generateAuthToken();
       const res = await request(server)
-        .get("/api/movies")
+        .get("/api/movies/page/1")
         .set("x-auth-token", token);
       expect(res.status).toBe(200);
       expect(res.body.length).toBe(2);

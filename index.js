@@ -6,16 +6,7 @@ const {
   Movie,
   Rentals,
   User,
-} = require("./main-file-imports/index");
-
-// TODO -validation check (done)
-// TODO --deleting calls by admin (done)
-// TODO ---get calls of individual movie(by name) , user(only admin) , rentals (by name) (by movie),customer(by name)(by movie)--->(done)
-// TODO ----check if movie is available or not (done)
-// TODO -----date middleware and rental fee calculation (done)
-// TODO ------test cases and logging(added for movie routes)
-// TODO -------pagination
-// TODO --------cleaning imports(done)
+} = require("./imports/routes/routes");
 
 app.use(express.json());
 

@@ -1,17 +1,26 @@
-const { Movie, validateMovie } = require("../../models/movie/movies");
 const express = require("express");
 const _ = require("lodash");
+
+const { Movie, validateMovie } = require("../../imports/models/models");
+
+const {
+  admin,
+  asyncMiddleware,
+  auth,
+} = require("../../imports/middleware/middleware");
+
 const router = express.Router();
-const asyncMiddleware = require("../../middleware/asyncMiddleware");
-const auth = require("../../middleware/auth");
-const admin = require("../../middleware/admin");
 
 router.get(
-  "/",
+  "/page/:page",
   auth,
-
   asyncMiddleware(async (req, res) => {
-    const movie = await Movie.find().sort("name");
+    const DOCUMENT_PER_PAGE = 2;
+    const documentToSkipForThisPage = (req.params.page - 1) * DOCUMENT_PER_PAGE;
+    const movie = await Movie.find()
+      .sort("name")
+      .skip(documentToSkipForThisPage)
+      .limit(DOCUMENT_PER_PAGE);
     res.send(movie);
   })
 );

@@ -1,17 +1,19 @@
-const { User, validateUser } = require("../../models/user/users");
+const { User, validateUser } = require("../../imports/models/models");
 const express = require("express");
-const router = express.Router();
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
 require("../../database/mongoose");
-const auth = require("../../middleware/auth");
-const asyncMiddleware = require("../../middleware/asyncMiddleware");
-const admin = require("../../middleware/admin");
+const {
+  admin,
+  asyncMiddleware,
+  auth,
+} = require("../../imports/middleware/middleware");
+
+const router = express.Router();
 
 router.post(
   "/",
   asyncMiddleware(async (req, res) => {
-    //const validateUser = validate(req.body);
     const validUserSchema = validateUser(req.body);
     if (validUserSchema.error) {
       return res.status(400).send(validUserSchema.error.details[0].message);
@@ -30,7 +32,6 @@ router.post(
     await user.save();
 
     const token = await user.generateAuthToken();
-    console.log(token);
     res
       .header(`x-auth-token`, token)
       .send(_.pick(user, ["_id", "name", "email", "password", "isAdmin"]));
@@ -38,10 +39,16 @@ router.post(
 );
 
 router.get(
-  "/",
+  "/page/:page",
   auth,
   asyncMiddleware(async (req, res) => {
-    const users = await User.find({}).select("-password");
+    const DOCUMENT_PER_PAGE = 2;
+    const documentToSkipForThisPage = (req.params.page - 1) * DOCUMENT_PER_PAGE;
+
+    const users = await User.find({})
+      .select("-password")
+      .skip(documentToSkipForThisPage)
+      .limit(DOCUMENT_PER_PAGE);
     res.send(users);
   })
 );

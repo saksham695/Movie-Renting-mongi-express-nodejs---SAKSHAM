@@ -1,22 +1,33 @@
-const {
-  Customer,
-  validateCustomer,
-} = require("../../models/customer/customers");
-const { Movie } = require("../../models/movie/movies");
-const { Rentals } = require("../../models/rental/rentals");
 const express = require("express");
 const _ = require("lodash");
+
+const {
+  Customer,
+  Movie,
+  Rentals,
+  validateCustomer,
+} = require("../../imports/models/models");
+
+const {
+  admin,
+  asyncMiddleware,
+  auth,
+  calculateDays,
+  currentDate,
+} = require("../../imports/middleware/middleware");
+
 const router = express.Router();
-const asyncMiddleware = require("../../middleware/asyncMiddleware");
-const auth = require("../../middleware/auth");
-const admin = require("../../middleware/admin");
-const currentDate = require("../../middleware/dateMiddleWare");
-const calculateDays = require("../../utils/rentDates");
+
 router.get(
-  "/detail",
+  "/detail/:page",
   auth,
   asyncMiddleware(async (req, res) => {
-    const customer = await Customer.find().sort("name");
+    const DOCUMENT_PER_PAGE = 2;
+    const documentToSkipForThisPage = (req.params.page - 1) * DOCUMENT_PER_PAGE;
+    const customer = await Customer.find()
+      .sort("name")
+      .skip(documentToSkipForThisPage)
+      .limit(DOCUMENT_PER_PAGE);
     res.send(customer);
   })
 );
@@ -53,10 +64,11 @@ router.post(
         damageCharges: 0,
       });
       await rental.save();
+      await customer.save();
+      await movie.save();
+      return res.send(_.pick(customer, ["name", "phone", "movie"]));
     }
-    await customer.save();
-    await movie.save();
-    res.send(_.pick(customer, ["name", "phone", "movie"]));
+    return res.status(404).send("Movie Not available");
   })
 );
 
@@ -113,22 +125,24 @@ router.patch(
       }
     }
 
-    res.send(
-      "customer record deleted from customer table and movie updated in stocks and you will find the total amount of rent in rentals table"
-    );
+    res.send("Customer Details Updated and Movie count updated");
   })
 );
 
 router.get(
-  "/:searchByItemValue",
+  "/:searchByItemValue/:page",
   auth,
   asyncMiddleware(async (req, res) => {
+    const DOCUMENT_PER_PAGE = 2;
+    const documentToSkipForThisPage = (req.params.page - 1) * DOCUMENT_PER_PAGE;
     const customer = await Customer.find({
       $or: [
         { name: req.params.searchByItemValue },
-        { Movie: req.params.searchByItemValue },
+        { movie: req.params.searchByItemValue },
       ],
-    });
+    })
+      .skip(documentToSkipForThisPage)
+      .limit(DOCUMENT_PER_PAGE);
     res.status(200).send(customer);
   })
 );
@@ -159,7 +173,10 @@ router.patch(
         },
       }
     );
-    console.log(updateCustomerDetails);
+    if (!updateCustomerDetails) {
+      return res.status(400).send("User does not exist");
+    }
+    return res.send(updateCustomerDetails);
   })
 );
 
